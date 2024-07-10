@@ -1,5 +1,3 @@
-# Example Package
+# Cacheasy
 
-This is a simple example package. You can use
-[GitHub-flavored Markdown](https://guides.github.com/features/mastering-markdown/)
-to write your content.
+This package contains some simple helper functions to cache data files. It makes use of pickle to store and load files.

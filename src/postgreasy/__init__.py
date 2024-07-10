@@ -9,18 +9,31 @@ import pytz
 import dotenv
 
 
-def get_connection(host: Optional[str] = None, database_name: Optional[str] = None, username: Optional[str] = None, password: Optional[str] = None):
+def get_connection(
+    host: Optional[str] = None,
+    username: Optional[str] = None,
+    password: Optional[str] = None,
+    database: Optional[str] = None,
+):
     if os.path.isfile('.env'):
         dotenv.load_dotenv()
-        password = os.environ['postgres_password']
-    elif host is None or database_name is None or username is None or password is None:
+        if host is None:
+            host = os.environ['postgres_host']
+        if username is None:
+            username = os.environ['postgres_username']
+        if password is None:
+            password = os.environ['postgres_password']
+        if database is None:
+            database = os.environ['postgres_database']
+
+    elif host is None or database is None or username is None or password is None:
         raise RuntimeError('No .env file given while one of the parameters is missing.')
 
     calling_function = inspect.stack()[2][3]
 
     connection = psycopg2.connect(
         host=host,
-        dbname=database_name,
+        dbname=database,
         user=username,
         password=password,
         application_name=f'{calling_function}()',
