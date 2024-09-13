@@ -4,14 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "postgreasy"
-version = "0.0.5"
+version = "0.1.1"
 dependencies = [
-  'pandas==2.2.2',
-  'psycopg2==2.9.9',
-  'psycopg2_binary==2.9.9',
-  'python-dotenv==1.0.1',
-  'pytz==2023.3.post1',
-  'importlib-metadata; python_version<"3.10"',
+  'pandas',
+  'psycopg2',
+  'psycopg2_binary',
+  'python-dotenv',
+  # 'importlib-metadata; python_version<"3.10"',
 ]
 authors = [{ name = "Casper Kole", email = "casper@voltgoed.nl" }]
 description = "A simple package for interacting with a Postgres Database."
@@ -24,5 +23,5 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com"
-Issues = "https://github.com"
+Homepage = "https://github.com/casper-voltgoed/postgreasy"
+Issues = "https://github.com/casper-voltgoed/postgreasy/issues"
