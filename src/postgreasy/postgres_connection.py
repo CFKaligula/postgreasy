@@ -92,18 +92,12 @@ class PostgresConnection:
         return exists
 
     def create_table_if_not_exists(self, schema_name: str, table_name: str, table_columns: sql.SQL, connection: Optional[Any] = None):
-        # table_exists_query = sql.SQL('select exists( select * FROM pg_catalog.pg_tables WHERE tablename = {table_name} and schemaname = {schema_name})').format(
-        #     table_name=sql.Literal(table_name), schema_name=sql.Literal(schema_name)
-        # )
-        # table_exists = self.fetch_with_query_on_db(table_exists_query)[0][0]
-
-        if not self.check_if_table_exists(schema_name, table_name):
-            create_table_query = sql.SQL('create table if not exists {schema_name}.{table_name} ({table_columns})').format(
-                schema_name=sql.Identifier(schema_name),
-                table_name=sql.Identifier(table_name),
-                table_columns=table_columns,
-            )
-            self.execute_query_on_db(create_table_query)
+        create_table_query = sql.SQL('create table if not exists {schema_name}.{table_name} ({table_columns})').format(
+            schema_name=sql.Identifier(schema_name),
+            table_name=sql.Identifier(table_name),
+            table_columns=table_columns,
+        )
+        self.execute_query_on_db(create_table_query)
 
     def create_schema_if_not_exists(self, schema_name: str):
         """
@@ -118,19 +112,6 @@ class PostgresConnection:
         """
         query = sql.SQL('create database {database_name};').format(database_name=sql.Identifier(database_name))
         self.execute_query_on_db(query)
-
-    # def insert_df2(self, df: pd.DataFrame, schema: str, table: str) -> None:
-    #     self._check_connection_exists()
-    #     cursor = self.connection.cursor()  # type:ignore
-
-    #     n_columns = df.shape[1]
-    #     insert_string_part = ','.join(['%s'] * n_columns)
-    #     insert_query = f'INSERT INTO {schema}.{table} VALUES ({insert_string_part}) ON CONFLICT do nothing'
-
-    #     cursor.executemany(insert_query, df.values.tolist())
-    #     self.connection.commit()  # type:ignore
-
-    #     print('Data inserted successfully.')
 
     def insert_df(self, df: pd.DataFrame, schema: str, table: str) -> None:
         """

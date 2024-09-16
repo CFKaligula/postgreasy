@@ -18,7 +18,7 @@ def get_connection(
     database: Optional[str] = None,
 ):
     if os.path.isfile('.env'):
-        dotenv.load_dotenv()
+        dotenv.load_dotenv('.env')
 
     host = os.environ['postgres_host'] if host is None else host
     username = os.environ['postgres_username'] if username is None else username
@@ -47,7 +47,7 @@ def get_connection(
 
 def create_database(database_name: str, connection: Optional[Any] = None):
     """
-    Create the given schema
+    Create the given database
     """
     query = sql.SQL('create database {database_name};').format(database_name=sql.Identifier(database_name))
     execute_query_on_db(query, connection)
@@ -55,7 +55,7 @@ def create_database(database_name: str, connection: Optional[Any] = None):
 
 def create_schema_if_not_exists(schema_name: str, connection: Optional[Any] = None):
     """
-    Create the given schema
+    Create the given schema,
     """
     schema_query = sql.SQL('create schema if not exists {schema_name};').format(schema_name=sql.Identifier(schema_name))
     execute_query_on_db(schema_query, connection)
@@ -123,18 +123,12 @@ def check_if_table_exists(schema_name: str, table_name: str, connection: Optiona
 
 
 def create_table_if_not_exists(schema_name: str, table_name: str, table_columns: sql.SQL, connection: Optional[Any] = None):
-    table_exists_query = sql.SQL('select exists( select * FROM pg_catalog.pg_tables WHERE tablename = {table_name} and schemaname = {schema_name})').format(
-        table_name=sql.Literal(table_name), schema_name=sql.Literal(schema_name)
+    create_table_query = sql.SQL('create table if not exists {schema_name}.{table_name} ({table_columns})').format(
+        schema_name=sql.Identifier(schema_name),
+        table_name=sql.Identifier(table_name),
+        table_columns=table_columns,
     )
-    table_exists = fetch_with_query_on_db(table_exists_query)[0][0]
-
-    if not table_exists:
-        create_table_query = sql.SQL('create table if not exists {schema_name}.{table_name} ({table_columns})').format(
-            schema_name=sql.Identifier(schema_name),
-            table_name=sql.Identifier(table_name),
-            table_columns=table_columns,
-        )
-        execute_query_on_db(create_table_query, connection)
+    execute_query_on_db(create_table_query, connection)
 
 
 # def get_most_recent_time_value(time_column: str, schema: str, table: str) -> dt.datetime:
@@ -154,21 +148,6 @@ def create_table_if_not_exists(schema_name: str, table_name: str, table_columns:
 #             database_newest_date = result[0][0]
 
 #     return database_newest_date
-
-
-# def insert_df(df: pd.DataFrame, schema: str, table: str) -> None:
-#     n_columns = df.shape[1]
-
-#     insert_string_part = ','.join(['%s'] * n_columns)
-
-#     insert_query = f'INSERT INTO {schema}.{table} VALUES ({insert_string_part}) ON CONFLICT do nothing'
-
-#     conn = get_connection()
-#     cursor = conn.cursor()
-#     cursor.executemany(insert_query, df.values.tolist())
-#     conn.commit()
-#     conn.close()
-#     print('Data inserted successfully.')
 
 
 def insert_df(df: pd.DataFrame, schema: str, table: str, connection: Optional[Any] = None) -> None:
