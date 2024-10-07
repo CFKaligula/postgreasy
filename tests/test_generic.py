@@ -30,11 +30,11 @@ def test_connect_other_db():
 
 
 def test_execute():
-    postgreasy.execute_query_on_db(sql.SQL('select 1'))
+    postgreasy.execute(sql.SQL('select 1'))
 
 
 def test_fetch():
-    x = postgreasy.fetch_with_query_on_db(sql.SQL('select 1'))
+    x = postgreasy.fetch(sql.SQL('select 1'))
     assert x == [(1,)]
 
 
@@ -43,10 +43,10 @@ def test_create_table():
     table_name = f'test_{str(uuid.uuid4())[:4]}'
     assert not postgreasy.check_if_table_exists(schema_name, table_name)
 
-    postgreasy.create_table_if_not_exists('public', table_name, sql.SQL('x int, y text'))
+    postgreasy.create_table('public', table_name, sql.SQL('x int, y text'))
     assert postgreasy.check_if_table_exists(schema_name, table_name)
 
-    postgreasy.execute_query_on_db(sql.SQL('drop table {schema}.{table}').format(schema=sql.Identifier(schema_name), table=sql.Identifier(table_name)))
+    postgreasy.execute(sql.SQL('drop table {schema}.{table}').format(schema=sql.Identifier(schema_name), table=sql.Identifier(table_name)))
     assert not postgreasy.check_if_table_exists(schema_name, table_name)
 
 
@@ -54,10 +54,10 @@ def test_insert():
     df = pd.DataFrame({'x': [1, 2, 3], 'y': [5, 28, 8]})
     test_table = f'test_insert_{str(uuid.uuid4())[:4]}'
 
-    postgreasy.create_table_if_not_exists('public', test_table, sql.SQL('x int, y int'))
+    postgreasy.create_table('public', test_table, sql.SQL('x int, y int'))
     postgreasy.insert_df(df, 'public', test_table)
-    records = postgreasy.fetch_with_query_on_db(sql.SQL('select x,y from {test_table}').format(test_table=sql.Identifier(test_table)))
-    postgreasy.execute_query_on_db(sql.SQL('drop table {test_table}').format(test_table=sql.Identifier(test_table)))
+    records = postgreasy.fetch(sql.SQL('select x,y from {test_table}').format(test_table=sql.Identifier(test_table)))
+    postgreasy.execute(sql.SQL('drop table {test_table}').format(test_table=sql.Identifier(test_table)))
 
     print(records)
     assert records == [(1, 5), (2, 28), (3, 8)]
@@ -67,10 +67,10 @@ def test_insert_swap_columns():
     df = pd.DataFrame({'x': [1, 2, 3], 'y': [5, 28, 8]})
     test_table = f'test_insert_{str(uuid.uuid4())[:4]}'
 
-    postgreasy.create_table_if_not_exists('public', test_table, sql.SQL('y int, x int'))
+    postgreasy.create_table('public', test_table, sql.SQL('y int, x int'))
     postgreasy.insert_df(df, 'public', test_table)
-    records = postgreasy.fetch_with_query_on_db(sql.SQL('select x,y from {test_table}').format(test_table=sql.Identifier(test_table)))
-    postgreasy.execute_query_on_db(sql.SQL('drop table {test_table}').format(test_table=sql.Identifier(test_table)))
+    records = postgreasy.fetch(sql.SQL('select x,y from {test_table}').format(test_table=sql.Identifier(test_table)))
+    postgreasy.execute(sql.SQL('drop table {test_table}').format(test_table=sql.Identifier(test_table)))
 
     print(records)
     assert records == [(1, 5), (2, 28), (3, 8)]
@@ -78,12 +78,12 @@ def test_insert_swap_columns():
 
 def test_create_schema():
     name = f'test_{str(uuid.uuid4())[:4]}'
-    postgreasy.create_schema_if_not_exists(name)
+    postgreasy.create_schema(name)
     exist_query = sql.SQL('select exists(SELECT * from information_schema.schemata WHERE schema_name = {schema})').format(schema=sql.Literal(name))
-    result = postgreasy.fetch_with_query_on_db(exist_query)
+    result = postgreasy.fetch(exist_query)
 
     delete_query = sql.SQL('drop schema {schema}').format(schema=sql.Identifier(name))
-    postgreasy.execute_query_on_db(delete_query)
+    postgreasy.execute(delete_query)
 
     assert result == [(True,)]
 

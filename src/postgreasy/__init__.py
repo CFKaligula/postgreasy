@@ -50,18 +50,42 @@ def create_database(database_name: str, connection: Optional[Any] = None):
     Create the given database
     """
     query = sql.SQL('create database {database_name};').format(database_name=sql.Identifier(database_name))
-    execute_query_on_db(query, connection)
+    execute(query, connection)
 
 
-def create_schema_if_not_exists(schema_name: str, connection: Optional[Any] = None):
+def create_schema(schema_name: str, connection: Optional[Any] = None):
     """
     Create the given schema,
     """
     schema_query = sql.SQL('create schema if not exists {schema_name};').format(schema_name=sql.Identifier(schema_name))
-    execute_query_on_db(schema_query, connection)
+    execute(schema_query, connection)
 
 
-def _execute_or_fetch_query_on_db(query: sql.Composable, fetch: bool = False, connection: Optional[Any] = None) -> Optional[list]:
+def create_table(schema_name: str, table_name: str, table_columns: sql.SQL, connection: Optional[Any] = None):
+    create_table_query = sql.SQL('create table if not exists {schema_name}.{table_name} ({table_columns})').format(
+        schema_name=sql.Identifier(schema_name),
+        table_name=sql.Identifier(table_name),
+        table_columns=table_columns,
+    )
+    execute(create_table_query, connection)
+
+
+def check_if_table_exists(schema_name: str, table_name: str, connection: Optional[Any] = None) -> bool:
+    exists_query = sql.SQL(
+        """select exists (
+                    select from information_schema.tables
+                    where  table_schema = {schema_name}
+                    and    table_name   = {table_name}
+                )"""
+    ).format(
+        schema_name=sql.Literal(schema_name),
+        table_name=sql.Literal(table_name),
+    )
+    exists = fetch(exists_query, connection)[0][0]
+    return exists
+
+
+def _execute_or_fetch(query: sql.Composable, fetch: bool = False, connection: Optional[Any] = None) -> Optional[list]:
     # TODO maakt nu iedere keer een nieuwe connectie niet heel nice
     if connection is None:
         must_close = True
@@ -99,36 +123,12 @@ def _execute_or_fetch_query_on_db(query: sql.Composable, fetch: bool = False, co
     return records
 
 
-def fetch_with_query_on_db(query: sql.Composable, connection: Optional[Any] = None) -> list:
-    return _execute_or_fetch_query_on_db(query, fetch=True, connection=connection)  # type:ignore
+def fetch(query: sql.Composable, connection: Optional[Any] = None) -> list:
+    return _execute_or_fetch(query, fetch=True, connection=connection)  # type:ignore
 
 
-def execute_query_on_db(query: sql.Composable, connection: Optional[Any] = None) -> list:
-    return _execute_or_fetch_query_on_db(query, fetch=False, connection=connection)  # type:ignore
-
-
-def check_if_table_exists(schema_name: str, table_name: str, connection: Optional[Any] = None) -> bool:
-    exists_query = sql.SQL(
-        """select exists (
-                    select from information_schema.tables
-                    where  table_schema = {schema_name}
-                    and    table_name   = {table_name}
-                )"""
-    ).format(
-        schema_name=sql.Literal(schema_name),
-        table_name=sql.Literal(table_name),
-    )
-    exists = fetch_with_query_on_db(exists_query, connection)[0][0]
-    return exists
-
-
-def create_table_if_not_exists(schema_name: str, table_name: str, table_columns: sql.SQL, connection: Optional[Any] = None):
-    create_table_query = sql.SQL('create table if not exists {schema_name}.{table_name} ({table_columns})').format(
-        schema_name=sql.Identifier(schema_name),
-        table_name=sql.Identifier(table_name),
-        table_columns=table_columns,
-    )
-    execute_query_on_db(create_table_query, connection)
+def execute(query: sql.Composable, connection: Optional[Any] = None) -> list:
+    return _execute_or_fetch(query, fetch=False, connection=connection)  # type:ignore
 
 
 # def get_most_recent_time_value(time_column: str, schema: str, table: str) -> dt.datetime:

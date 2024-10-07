@@ -53,7 +53,7 @@ class PostgresConnection:
         if self.connection is None or self.connection.closed:
             raise RuntimeError('Connection not made yet.')
 
-    def _execute_or_fetch_query_on_db(self, query: sql.Composable, fetch: bool = False) -> Optional[list]:
+    def _execute_or_fetch(self, query: sql.Composable, fetch: bool = False) -> Optional[list]:
         self._check_connection_exists()
         cursor = self.connection.cursor()  # type:ignore
 
@@ -71,11 +71,11 @@ class PostgresConnection:
 
         return records
 
-    def fetch_with_query_on_db(self, query: sql.Composable) -> list:
-        return self._execute_or_fetch_query_on_db(query, fetch=True)  # type:ignore
+    def fetch(self, query: sql.Composable) -> list:
+        return self._execute_or_fetch(query, fetch=True)  # type:ignore
 
-    def execute_query_on_db(self, query: sql.Composable) -> list:
-        return self._execute_or_fetch_query_on_db(query, fetch=False)  # type:ignore
+    def execute(self, query: sql.Composable) -> list:
+        return self._execute_or_fetch(query, fetch=False)  # type:ignore
 
     def check_if_table_exists(self, schema_name: str, table_name: str) -> bool:
         exists_query = sql.SQL(
@@ -88,30 +88,30 @@ class PostgresConnection:
             schema_name=sql.Literal(schema_name),
             table_name=sql.Literal(table_name),
         )
-        exists = self.fetch_with_query_on_db(exists_query)[0][0]
+        exists = self.fetch(exists_query)[0][0]
         return exists
 
-    def create_table_if_not_exists(self, schema_name: str, table_name: str, table_columns: sql.SQL, connection: Optional[Any] = None):
+    def create_table(self, schema_name: str, table_name: str, table_columns: sql.SQL, connection: Optional[Any] = None):
         create_table_query = sql.SQL('create table if not exists {schema_name}.{table_name} ({table_columns})').format(
             schema_name=sql.Identifier(schema_name),
             table_name=sql.Identifier(table_name),
             table_columns=table_columns,
         )
-        self.execute_query_on_db(create_table_query)
+        self.execute(create_table_query)
 
-    def create_schema_if_not_exists(self, schema_name: str):
+    def create_schema(self, schema_name: str):
         """
         Create the given schema
         """
         schema_query = sql.SQL('create schema if not exists {schema_name};').format(schema_name=sql.Identifier(schema_name))
-        self.execute_query_on_db(schema_query)
+        self.execute(schema_query)
 
     def create_database(self, database_name: str):
         """
         Create the given database
         """
         query = sql.SQL('create database {database_name};').format(database_name=sql.Identifier(database_name))
-        self.execute_query_on_db(query)
+        self.execute(query)
 
     def insert_df(self, df: pd.DataFrame, schema: str, table: str) -> None:
         """
