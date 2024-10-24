@@ -15,6 +15,7 @@ class PostgresConnection:
         username: Optional[str] = None,
         password: Optional[str] = None,
         database: Optional[str] = None,
+        ssl_required: bool = False,
     ):
         if os.path.isfile('.env'):
             dotenv.load_dotenv()
@@ -23,6 +24,7 @@ class PostgresConnection:
         self.username = os.environ['postgres_username'] if username is None else username
         self.password = os.environ['postgres_password'] if password is None else password
         self.database = os.environ['postgres_database'] if database is None else database
+        self.ssl_mode = 'require' if ssl_required else 'disable'
 
         if self.host is None or self.database is None or self.username is None or self.password is None:
             raise RuntimeError('No env. variable set or .env file given while one of the parameters is missing.')
@@ -41,6 +43,7 @@ class PostgresConnection:
             user=self.username,
             password=self.password,
             application_name=f'{calling_function}()',
+            sslmode=self.ssl_mode,
         )
 
         self.connection.autocommit = True
