@@ -14,7 +14,7 @@ def test_connect():
 
 
 def test_connect_ssl():
-    with PostgresConnection(ssl=True) as conn:
+    with PostgresConnection(ssl_required=True) as conn:
         x = conn.fetch('select 1')
         print(x)
         assert x == [(1,)]
