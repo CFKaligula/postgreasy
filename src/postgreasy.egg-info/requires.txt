@@ -1,4 +1,0 @@
-pandas
-psycopg2
-psycopg2_binary
-python-dotenv
