@@ -7,9 +7,9 @@ name = "postgreasy"
 version = "1.1.0"
 dependencies = [
   'pandas',
-  'psycopg2',
-  'psycopg2_binary',
-  'python-dotenv',
+  "psycopg2",
+  "psycopg2-binary",
+  "python-dotenv",
   # 'importlib-metadata; python_version<"3.10"',
 ]
 authors = [{ name = "Casper Kole", email = "casper@voltgoed.nl" }]
@@ -25,3 +25,9 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/casper-voltgoed/postgreasy"
 Issues = "https://github.com/casper-voltgoed/postgreasy/issues"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.14.0",
+    "pytest>=8.3.4",
+]
