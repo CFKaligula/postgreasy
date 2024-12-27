@@ -1,11 +1,12 @@
 import inspect
 import os
-import numpy as np
-import psycopg2
-import pandas as pd
-from psycopg2 import sql
 from typing import Any, Optional
+
 import dotenv
+import numpy as np
+import pandas as pd
+import psycopg2
+from psycopg2 import sql
 
 
 class PostgresConnection:
