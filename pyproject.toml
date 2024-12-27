@@ -23,11 +23,8 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/casper-voltgoed/postgreasy"
-Issues = "https://github.com/casper-voltgoed/postgreasy/issues"
+Homepage = "https://github.com/CFKaligula/postgreasy"
+Issues = "https://github.com/CFKaligula/postgreasy/issues"
 
 [dependency-groups]
-dev = [
-    "mypy>=1.14.0",
-    "pytest>=8.3.4",
-]
+dev = ["mypy>=1.14.0", "pytest>=8.3.4"]
