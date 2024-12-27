@@ -50,7 +50,10 @@ class PostgresConnection:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.connection.close()
+        if self.connection is not None:
+            self.connection.close()
+        else:
+            raise Exception('Tried to close connection when it was not created yet!')
 
     def _check_connection_exists(self):
         if self.connection is None or self.connection.closed:
