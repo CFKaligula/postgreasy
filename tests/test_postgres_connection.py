@@ -8,25 +8,25 @@ from src.postgreasy import PostgresConnection
 
 def test_connect():
     with PostgresConnection() as conn:
-        x = conn.fetch('select 1')
+        x = conn.fetch(sql.SQL('select 1'))
         print(x)
         assert x == [(1,)]
 
 
 def test_connect_ssl():
     with PostgresConnection(ssl_required=True) as conn:
-        x = conn.fetch('select 1')
+        x = conn.fetch(sql.SQL('select 1'))
         print(x)
         assert x == [(1,)]
 
 
 def test_disconnect():
     with PostgresConnection() as conn:
-        x = conn.fetch('select 1')
+        x = conn.fetch(sql.SQL('select 1'))
         assert x == [(1,)]
 
     with pytest.raises(RuntimeError):
-        conn.fetch('select 1')
+        conn.fetch(sql.SQL('select 1'))
 
 
 def test_create_table():
